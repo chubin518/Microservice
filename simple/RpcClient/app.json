@@ -1,0 +1,12 @@
+﻿{
+  "Services": {
+    "Clients": {
+      "RpcContracts": [
+        {
+          "Host": "127.0.0.1",
+          "Port": 10000
+        }
+      ]
+    }
+  }
+}
