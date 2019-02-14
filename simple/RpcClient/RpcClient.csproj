@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotNetCore.Microservice.HttpKestrel\DotNetCore.Microservice.HttpKestrel.csproj" />
+    <ProjectReference Include="..\..\src\DotNetCore.Microservice.NetMQ\DotNetCore.Microservice.NetMQ.csproj" />
     <ProjectReference Include="..\RpcContracts\RpcContracts.csproj" />
   </ItemGroup>
 

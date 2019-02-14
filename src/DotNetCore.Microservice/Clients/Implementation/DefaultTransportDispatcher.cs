@@ -10,12 +10,12 @@ namespace DotNetCore.Microservice.Clients
 {
     public class DefaultTransportDispatcher : ITransportDispatcher
     {
-        private ITransportClient _transportClient;
+        private ITransportClientFactory _transportClientFactory;
         private TransportClientOptions _clientOptions;
-        public DefaultTransportDispatcher(ITransportClient transportClient,
+        public DefaultTransportDispatcher(ITransportClientFactory transportClientFactory,
             TransportClientOptions clientOptions)
         {
-            _transportClient = transportClient ?? throw new ArgumentNullException(nameof(transportClient));
+            _transportClientFactory = transportClientFactory ?? throw new ArgumentNullException(nameof(transportClientFactory));
             _clientOptions = clientOptions ?? throw new ArgumentNullException(nameof(clientOptions));
         }
 
@@ -45,7 +45,7 @@ namespace DotNetCore.Microservice.Clients
             if (lstClient != null && lstClient.Any())
             {
                 int index = new Random().Next(0, lstClient.Count);
-                var response = await _transportClient.SendAsync(lstClient[index].ToEndPoint(), request);
+                var response = await _transportClientFactory.CreateClient(lstClient[index].ToEndPoint()).SendAsync(request);
                 return (TResult)response.ReturnValue;
             }
             else

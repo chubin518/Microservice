@@ -1,5 +1,4 @@
 ﻿using RpcContracts;
-using System;
 using System.Threading.Tasks;
 
 namespace RpcServer
@@ -11,10 +10,11 @@ namespace RpcServer
             return $"hello {name}";
         }
 
-        public Task<string> HelloAsync(string name)
+        public async Task<string> HelloAsync(string name)
         {
             string result = Hello(name);
-            return Task.FromResult(result+" 我是异步请求");
+            await Task.Delay(5000);
+            return result + " 我是异步请求";
         }
     }
 }

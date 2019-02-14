@@ -7,11 +7,11 @@ using System.Net.Http.Headers;
 
 namespace DotNetCore.Microservice.HttpKestrel.Internal
 {
-    public class DefaultHttpContextFactory : IOwinContextFactory
+    public class HttpContextFactory : IOwinContextFactory
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ISerializer<string> _serializer;
-        public DefaultHttpContextFactory(IServiceProvider serviceProvider, ISerializer<string> serializer)
+        public HttpContextFactory(IServiceProvider serviceProvider, ISerializer<string> serializer)
         {
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));

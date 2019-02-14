@@ -1,8 +1,9 @@
-﻿using DotNetCore.Microservice.HttpKestrel;
+﻿using DotNetCore.Microservice.NetMQ;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RpcContracts;
 using System;
+using System.Threading.Tasks;
 
 namespace RpcClient
 {
@@ -10,9 +11,10 @@ namespace RpcClient
     {
         static void Main(string[] args)
         {
+
             var builder = new ConfigurationBuilder();
             IServiceCollection serviceDescriptors = new ServiceCollection();
-            serviceDescriptors.AddKestrelClient()
+            serviceDescriptors.AddNetmqClient()
                     .AddSingleton<IConfiguration>(i => builder.AddJsonFile("app.json").Build());
             IServiceProvider serviceProvider = serviceDescriptors.BuildServiceProvider();
 

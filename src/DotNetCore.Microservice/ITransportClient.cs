@@ -1,11 +1,12 @@
 ﻿using DotNetCore.Microservice.Owin;
+using System;
 using System.Net;
 using System.Threading.Tasks;
 
 namespace DotNetCore.Microservice
 {
-    public interface ITransportClient
+    public interface ITransportClient : IDisposable
     {
-        Task<OwinResponse> SendAsync(EndPoint end, OwinRequest request);
+        Task<OwinResponse> SendAsync(OwinRequest request);
     }
 }

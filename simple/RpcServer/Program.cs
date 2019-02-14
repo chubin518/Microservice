@@ -2,6 +2,8 @@
 using DotNetCore.Microservice.HttpKestrel;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using DotNetCore.Microservice.NetMQ;
+
 namespace RpcServer
 {
     class Program
@@ -14,7 +16,8 @@ namespace RpcServer
                          configure.AddConsole();
                          //configure.AddDebug();
                      })
-                     .UseKestrelServer()
+                     //.UseKestrelServer()
+                     .UseNetmqServer()
                      .UseStartup<Startup>()
                      .Build()
                      .Run();

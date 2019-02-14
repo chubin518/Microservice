@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace DotNetCore.Microservice.HttpKestrel
 {
-    public static class HttpKestrelHostExtensions
+    public static class HostBuilderExtensions
     {
         public static IHostBuilder UseKestrelServer(this IHostBuilder builder, int port = 10000)
         {
@@ -13,7 +13,7 @@ namespace DotNetCore.Microservice.HttpKestrel
             {
                 services.AddMicroCore();
                 services.AddMicroServer(port);
-                services.TryAddSingleton<IOwinContextFactory, DefaultHttpContextFactory>();
+                services.TryAddSingleton<IOwinContextFactory, HttpContextFactory>();
                 services.AddSingleton<IHostingServer, HttpKestrelHostingServer>();
             });
         }

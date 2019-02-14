@@ -9,7 +9,7 @@ namespace DotNetCore.Microservice.HttpKestrel
             HttpClientFactoryServiceCollectionExtensions.AddHttpClient(services);
             services.AddMicroCore();
             services.AddMicroClient();
-            services.AddSingleton<ITransportClient, HttpTransportClient>();
+            services.AddSingleton<ITransportClientFactory, HttpTransportClientFactory>();
             return services;
         }
     }

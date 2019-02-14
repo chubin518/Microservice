@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.Microservice.HttpKestrel.Internal
+namespace DotNetCore.Microservice.HttpKestrel
 {
     public class HttpKestrelHostingServer : IHostingServer
     {
