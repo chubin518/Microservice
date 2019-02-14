@@ -5,6 +5,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 
+//Request-Response模式： NetMQ.FiniteStateMachineException:“Req.XSend - cannot send another request”
 namespace DotNetCore.Microservice.NetMQ
 {
     public class NetmqTransportClient : ITransportClient

@@ -17,16 +17,16 @@ namespace DotNetCore.Microservice.NetMQ
         private readonly NetMQSocket _serverSocket;
         private readonly NetMQPoller _poller;
         private readonly HostingOptions _hostingOptions;
-        private readonly IEnumerable<ILoggerProvider> _loggerProviders;
         private readonly ISerializer<string> _serializer;
+        private readonly ILogger<NetmqHostingServer> _logger;
 
         public NetmqHostingServer(IOptions<HostingOptions> options,
             ISerializer<string> serializer,
-            IEnumerable<ILoggerProvider> loggerProviders)
+            ILogger<NetmqHostingServer> logger)
         {
             _hostingOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
-            _loggerProviders = loggerProviders ?? throw new ArgumentNullException(nameof(loggerProviders));
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _serverSocket = new ResponseSocket($"tcp://{_hostingOptions.Host}");
             _serverSocket.Options.TcpKeepalive = true;
@@ -43,6 +43,7 @@ namespace DotNetCore.Microservice.NetMQ
                 OwinContext owinContext = null;
                 try
                 {
+                    _logger.LogInformation(message);
                     owinContext = hostingApplication.CreateContext(message);
                     await hostingApplication.ProcessRequestAsync(owinContext);
                 }
