@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DotNetCore.Microservice.Owin
 {
-   public class OwinResponse
-    {/// <summary>
-     /// 响应值
-     /// </summary>
+    public class OwinResponse
+    {
+        /// <summary>
+        /// 响应值
+        /// </summary>
         public int StatusCode { get; set; }
 
         /// <summary>

@@ -46,7 +46,6 @@ namespace DotNetCore.Microservice.Internal
         public async Task ProcessRequestAsync(OwinContext context)
         {
             await _application(context);
-          
         }
 
         /// <summary>

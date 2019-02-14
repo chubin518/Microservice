@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace DotNetCore.Microservice.Owin
 {
     public class OwinContext
     {
+
         /// <summary>
         /// 提供对当前请求级别容器的服务的访问
         /// </summary>

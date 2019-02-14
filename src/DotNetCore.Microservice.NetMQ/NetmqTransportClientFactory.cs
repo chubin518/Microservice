@@ -1,6 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Net;
-
 namespace DotNetCore.Microservice.NetMQ
 {
     public class NetmqTransportClientFactory : ITransportClientFactory
@@ -10,7 +10,7 @@ namespace DotNetCore.Microservice.NetMQ
 
         public NetmqTransportClientFactory(ISerializer<string> serializer)
         {
-            this._serializer = serializer;
+            this._serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
         public ITransportClient CreateClient(EndPoint endPoint)

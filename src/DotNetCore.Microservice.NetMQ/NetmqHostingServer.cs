@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +14,7 @@ namespace DotNetCore.Microservice.NetMQ
 {
     public class NetmqHostingServer : IHostingServer
     {
+        private static readonly double TimestampToTicks = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
         private readonly NetMQSocket _serverSocket;
         private readonly NetMQPoller _poller;
         private readonly HostingOptions _hostingOptions;
@@ -41,9 +42,10 @@ namespace DotNetCore.Microservice.NetMQ
             {
                 string message = _serverSocket.ReceiveFrameString(Encoding.UTF8);
                 OwinContext owinContext = null;
+                long startTimestamp = Stopwatch.GetTimestamp();
                 try
                 {
-                    _logger.LogInformation(message);
+                    _logger.LogInformation($"Request starting tcp://{_hostingOptions.Host} {message}");
                     owinContext = hostingApplication.CreateContext(message);
                     await hostingApplication.ProcessRequestAsync(owinContext);
                 }
@@ -55,6 +57,7 @@ namespace DotNetCore.Microservice.NetMQ
                 finally
                 {
                     string text = _serializer.Serialize(owinContext.Response);
+                    _logger.LogInformation($"Request finished in {new TimeSpan((long)(TimestampToTicks * (Stopwatch.GetTimestamp() - startTimestamp))).TotalMilliseconds}ms {text}");
                     _serverSocket.SendFrame(text);
                     hostingApplication.DisponseContext(owinContext);
                 }
