@@ -1,7 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http;
-using System;
 
 namespace DotNetCore.Microservice.HttpKestrel
 {
@@ -20,16 +20,7 @@ namespace DotNetCore.Microservice.HttpKestrel
 
         public ITransportClient CreateClient(EndPoint endPoint)
         {
-            if (clients.TryGetValue(endPoint, out ITransportClient transportClient))
-            {
-                return transportClient;
-            }
-            else
-            {
-                transportClient = new HttpTransportClient(_httpClientFactory, _serializer, endPoint);
-                clients.AddOrUpdate(endPoint, transportClient, (point, client) => transportClient);
-                return transportClient;
-            }
+            return clients.GetOrAdd(endPoint, (point) => new HttpTransportClient(_httpClientFactory, _serializer, point));
         }
     }
 }

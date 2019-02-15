@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RpcServer", "simple\RpcServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.Microservice.NetMQ", "src\DotNetCore.Microservice.NetMQ\DotNetCore.Microservice.NetMQ.csproj", "{955E9706-38A2-4EE5-A8BB-D921E0686019}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "simple\ConsoleApp1\ConsoleApp1.csproj", "{E8E267B3-9EF1-42BF-B484-035D186AED29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{955E9706-38A2-4EE5-A8BB-D921E0686019}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{955E9706-38A2-4EE5-A8BB-D921E0686019}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{955E9706-38A2-4EE5-A8BB-D921E0686019}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8E267B3-9EF1-42BF-B484-035D186AED29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8E267B3-9EF1-42BF-B484-035D186AED29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8E267B3-9EF1-42BF-B484-035D186AED29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8E267B3-9EF1-42BF-B484-035D186AED29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{4A903AF8-53A0-4CCE-AB27-27506BF6AB05} = {60FA9859-242A-405B-A417-67744EFE49EA}
 		{B5F1BE8A-E39A-4075-9664-7215CAEF05B1} = {60FA9859-242A-405B-A417-67744EFE49EA}
 		{955E9706-38A2-4EE5-A8BB-D921E0686019} = {BDD6B3C9-2470-49E3-872A-DBE60162AA28}
+		{E8E267B3-9EF1-42BF-B484-035D186AED29} = {60FA9859-242A-405B-A417-67744EFE49EA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D9A5A10C-C100-432C-8B0E-354283F589FB}

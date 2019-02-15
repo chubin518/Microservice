@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Net;
+
 namespace DotNetCore.Microservice.NetMQ
 {
+    /// <summary>
+    /// https://www.cnblogs.com/CreateMyself/p/6086752.html
+    /// </summary>
     public class NetmqTransportClientFactory : ITransportClientFactory
     {
-        private ISerializer<string> _serializer;
-        private readonly ConcurrentDictionary<EndPoint, ITransportClient> clients = new ConcurrentDictionary<EndPoint, ITransportClient>();
-
+        private readonly ISerializer<string> _serializer;
+        private static readonly ConcurrentDictionary<EndPoint, ITransportClient> clients = new ConcurrentDictionary<EndPoint, ITransportClient>();
         public NetmqTransportClientFactory(ISerializer<string> serializer)
         {
             this._serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
@@ -15,16 +18,11 @@ namespace DotNetCore.Microservice.NetMQ
 
         public ITransportClient CreateClient(EndPoint endPoint)
         {
-            if (clients.TryGetValue(endPoint, out ITransportClient transportClient))
+            return clients.GetOrAdd(endPoint, (point) =>
             {
-                return transportClient;
-            }
-            else
-            {
-                transportClient = new NetmqTransportClient(_serializer, endPoint);
-                clients.AddOrUpdate(endPoint, transportClient, (point, client) => transportClient);
-                return transportClient;
-            }
+                Console.WriteLine(point);
+                return new NetmqTransportClient(_serializer, endPoint);
+            });
         }
     }
 }

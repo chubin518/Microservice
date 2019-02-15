@@ -3,10 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RpcContracts;
 using System;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
-using DotNetCore.Microservice.HttpKestrel;
-
 namespace RpcClient
 {
     class Program
@@ -22,16 +20,18 @@ namespace RpcClient
             IServiceProvider serviceProvider = serviceDescriptors.BuildServiceProvider();
 
             IHelloService helloService = serviceProvider.GetRequiredService<IHelloService>();
-            // 异步请求
-            //Task.Run(async () =>
-            //{
-            //    string data = await helloService.HelloAsync("tom");
-            //    Console.WriteLine(data);
-            //});
-            Thread.Sleep(1000);
-            // 同步请求
-            string result = helloService.Hello("tom");
-            Console.WriteLine(result);
+            Enumerable.Range(0, 1000).ToList().ForEach(item =>
+            {
+                Task.Factory.StartNew((async () =>
+                {
+                    string data = await helloService.HelloAsync("tom");
+                    Console.WriteLine(data);
+                    await Task.Delay(1000);
+                    string result = helloService.Hello("tom");
+                    Console.WriteLine(result);
+                }));
+            });
+
             Console.ReadKey();
         }
     }

@@ -1,5 +1,7 @@
 ﻿using DotNetCore.Microservice.Core;
 using DotNetCore.Microservice.Owin;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -24,7 +26,7 @@ namespace DotNetCore.Microservice.Routing
             {
                 route.Handler = async (context) =>
                 {
-                    object instance = context.RequestServices.GetService(this.Service);
+                    object instance = context.RequestServices.GetRequiredService(this.Service);
                     object[] methodArgs = context.Request.Parameters;
                     object resultObj;
                     if (_methodExecutor.IsMethodAsync)
