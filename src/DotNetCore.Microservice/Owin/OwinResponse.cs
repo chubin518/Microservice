@@ -5,6 +5,16 @@ namespace DotNetCore.Microservice.Owin
 {
     public class OwinResponse
     {
+        public OwinResponse(string requestId)
+        {
+            RequestId = requestId;
+        }
+
+        /// <summary>
+        /// 请求传来的唯一标识
+        /// </summary>
+        public string RequestId { get; set; }
+
         /// <summary>
         /// 响应值
         /// </summary>
@@ -30,14 +40,11 @@ namespace DotNetCore.Microservice.Owin
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static OwinResponse Success(object result)
+        public void Success(object result)
         {
-            return new OwinResponse()
-            {
-                StatusCode = 200,
-                StatusMessage = "success",
-                ReturnValue = result
-            };
+            this.StatusCode = 200;
+            this.StatusMessage = "success";
+            this.ReturnValue = result;
         }
 
         /// <summary>
@@ -45,14 +52,11 @@ namespace DotNetCore.Microservice.Owin
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static OwinResponse Nofound(string msg = "")
+        public void Nofound(string msg = "")
         {
-            return new OwinResponse()
-            {
-                StatusCode = 404,
-                StatusMessage = string.IsNullOrWhiteSpace(msg) ? "Not Found" : msg,
-                ReturnValue = ""
-            };
+            this.StatusCode = 404;
+            this.StatusMessage = string.IsNullOrWhiteSpace(msg) ? "Not Found" : msg;
+            this.ReturnValue = "";
         }
 
         /// <summary>
@@ -60,14 +64,11 @@ namespace DotNetCore.Microservice.Owin
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static OwinResponse Error(string msg = null)
+        public void Error(string msg = null)
         {
-            return new OwinResponse()
-            {
-                StatusCode = 500,
-                StatusMessage = string.IsNullOrWhiteSpace(msg) ? "Internal Server Error" : msg,
-                ReturnValue = ""
-            };
+            this.StatusCode = 500;
+            this.StatusMessage = string.IsNullOrWhiteSpace(msg) ? "Internal Server Error" : msg;
+            this.ReturnValue = "";
         }
 
         /// <summary>
@@ -75,14 +76,11 @@ namespace DotNetCore.Microservice.Owin
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static OwinResponse Unauthorized(string msg = null)
+        public void Unauthorized(string msg = null)
         {
-            return new OwinResponse()
-            {
-                StatusCode = 401,
-                StatusMessage = string.IsNullOrWhiteSpace(msg) ? "Unauthorized" : msg,
-                ReturnValue = ""
-            };
+            this.StatusCode = 401;
+            this.StatusMessage = string.IsNullOrWhiteSpace(msg) ? "Unauthorized" : msg;
+            this.ReturnValue = "";
         }
     }
 }

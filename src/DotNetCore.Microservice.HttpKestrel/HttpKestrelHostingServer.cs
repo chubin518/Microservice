@@ -65,7 +65,7 @@ namespace DotNetCore.Microservice.HttpKestrel
                 }
                 catch (Exception ex)
                 {
-                    owinContext.Response = OwinResponse.Error(ex.Message);
+                    owinContext.Response.Error(ex.Message);
                     throw;
                 }
                 finally

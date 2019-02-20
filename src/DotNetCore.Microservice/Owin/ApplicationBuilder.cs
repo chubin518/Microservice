@@ -23,7 +23,7 @@ namespace DotNetCore.Microservice.Owin
         {
             RequestDelegate next = context =>
             {
-                context.Response = OwinResponse.Nofound();
+                context.Response.Nofound();
                 return Task.CompletedTask;
             };
 

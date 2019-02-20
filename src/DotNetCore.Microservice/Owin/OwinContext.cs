@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace DotNetCore.Microservice.Owin
 {
     public class OwinContext
     {
+        public OwinContext(OwinRequest request)
+        {
+            Request = request;
+            Response = new OwinResponse(request.Id);
+        }
 
         /// <summary>
         /// 提供对当前请求级别容器的服务的访问
@@ -15,12 +19,12 @@ namespace DotNetCore.Microservice.Owin
         /// <summary>
         /// 当前请求信息
         /// </summary>
-        public OwinRequest Request { get; set; } = new OwinRequest();
+        public OwinRequest Request { get; }
 
         /// <summary>
         /// 当前响应信息
         /// </summary>
-        public OwinResponse Response { get; set; } = new OwinResponse();
+        public OwinResponse Response { get; }
 
         /// <summary>
         /// 当前上下文拓展信息

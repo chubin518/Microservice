@@ -17,11 +17,9 @@ namespace DotNetCore.Microservice.NetMQ
         public OwinContext Create(object feature)
         {
             string formData = (feature as string) ?? throw new InvalidOperationException("当前上线文信息为null或类型错误");
-            return new OwinContext()
+            return new OwinContext(_serializer.Deserialize<OwinRequest>(formData))
             {
                 RequestServices = _serviceScopeFactory.CreateScope().ServiceProvider,
-                Request = _serializer.Deserialize<OwinRequest>(formData),
-                Response = new OwinResponse()
             };
         }
 

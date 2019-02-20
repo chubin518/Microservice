@@ -37,7 +37,7 @@ namespace DotNetCore.Microservice.Routing
                     {
                         resultObj = _methodExecutor.Execute(instance, methodArgs);
                     }
-                    context.Response = OwinResponse.Success(resultObj);
+                    context.Response.Success(resultObj);
                 };
             }
             return Task.CompletedTask;

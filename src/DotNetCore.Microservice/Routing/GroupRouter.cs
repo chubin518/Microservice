@@ -21,7 +21,7 @@ namespace DotNetCore.Microservice.Routing
             {
                 context.Handler = (ctx) =>
                 {
-                    ctx.Response = OwinResponse.Nofound($"can not match service group {context.Group}");
+                    ctx.Response.Nofound($"can not match service group {context.Group}");
                     return Task.CompletedTask;
                 };
                 return Task.CompletedTask;

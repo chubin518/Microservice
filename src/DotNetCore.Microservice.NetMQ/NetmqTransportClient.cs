@@ -2,46 +2,73 @@
 using NetMQ;
 using NetMQ.Sockets;
 using System;
+using System.Collections.Concurrent;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 namespace DotNetCore.Microservice.NetMQ
 {
     public class NetmqTransportClient : ITransportClient
     {
-        private readonly string INPROC_CLIENT_URL ;
+        private readonly string Identity;
         private readonly NetMQSocket _dealerSocket; //连接到服务端
         private readonly NetMQSocket _routerSocket;
-        private readonly Proxy _dealerProxy;
+        private readonly NetMQPoller _poller;
         private readonly ISerializer<string> _serializer;
         private readonly EndPoint _endPoint;
+
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<OwinResponse>> _requests = new ConcurrentDictionary<string, TaskCompletionSource<OwinResponse>>();
         public NetmqTransportClient(ISerializer<string> serializer, EndPoint endPoint)
         {
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             _endPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
-            INPROC_CLIENT_URL = "inproc://request_dealer" + Guid.NewGuid().ToString();
+            Identity = Guid.NewGuid().ToString();
             _dealerSocket = new DealerSocket($"tcp://{endPoint}");
-            _routerSocket = new RouterSocket(INPROC_CLIENT_URL);
-            _dealerProxy = new Proxy(_dealerSocket, _routerSocket);
-            Task.Factory.StartNew(_dealerProxy.Start);
+            _dealerSocket.Options.Identity = Encoding.UTF8.GetBytes(Identity);
+            _dealerSocket.ReceiveReady += DealerSocket_ReceiveReady;
+            _routerSocket = new RouterSocket($"inproc://{Identity}");
+            _routerSocket.ReceiveReady += RouterSocket_ReceiveReady;
+            _poller = new NetMQPoller { _dealerSocket, _routerSocket };
+            _poller.RunAsync();
         }
+
+        private void RouterSocket_ReceiveReady(object sender, NetMQSocketEventArgs e)
+        {
+            NetMQMessage message = e.Socket.ReceiveMultipartMessage();
+            _dealerSocket.SendMultipartMessage(message);
+        }
+
+        private void DealerSocket_ReceiveReady(object sender, NetMQSocketEventArgs e)
+        {
+            NetMQMessage message = e.Socket.ReceiveMultipartMessage();
+            string address = message.Pop().ConvertToString(Encoding.UTF8);
+            string content = message.Pop().ConvertToString(Encoding.UTF8);
+            OwinResponse response = _serializer.Deserialize<OwinResponse>(content);
+            if (_requests.TryRemove(response.RequestId, out var taskCompletion))
+            {
+                taskCompletion.SetResult(response);
+            }
+        }
+
         public void Dispose()
         {
             _dealerSocket.Dispose();
             _routerSocket.Dispose();
-            _dealerProxy.Stop();
+            _poller.StopAsync();
         }
 
         public Task<OwinResponse> SendAsync(OwinRequest request)
         {
-            return Task.Factory.StartNew(() =>
+            var taskCompletionSource = new TaskCompletionSource<OwinResponse>();
+            using (NetMQSocket requestSocket = new DealerSocket($"inproc://{Identity}"))
             {
-                using (NetMQSocket requestSocket = new RequestSocket(INPROC_CLIENT_URL))
-                {
-                    requestSocket.SendFrame(_serializer.Serialize(request));
-                    string resultData = requestSocket.ReceiveFrameString();
-                    return _serializer.Deserialize<OwinResponse>(resultData);
-                }
-            });
+                NetMQMessage sendMessage = new NetMQMessage();
+                sendMessage.AppendEmptyFrame();
+                sendMessage.Append(_serializer.Serialize(request), Encoding.UTF8);
+                requestSocket.SendMultipartMessage(sendMessage);
+                _requests.AddOrUpdate(request.Id, taskCompletionSource, (key, value) => taskCompletionSource);
+                return taskCompletionSource.Task;
+            }
         }
     }
 

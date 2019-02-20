@@ -29,11 +29,9 @@ namespace DotNetCore.Microservice.HttpKestrel.Internal
                 using (StreamReader streamReader = new StreamReader(httpContext.Request.Body))
                 {
                     var formData = streamReader.ReadToEnd();
-                    return new OwinContext()
+                    return new OwinContext(_serializer.Deserialize<OwinRequest>(formData))
                     {
                         RequestServices = _serviceScopeFactory.CreateScope().ServiceProvider,
-                        Request = _serializer.Deserialize<OwinRequest>(formData),
-                        Response = new OwinResponse()
                     };
                 }
             }

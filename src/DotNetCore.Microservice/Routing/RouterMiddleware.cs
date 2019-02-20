@@ -24,7 +24,7 @@ namespace DotNetCore.Microservice.Routing
                 }
                 catch (System.Exception ex)
                 {
-                    context.Response = OwinResponse.Error(ex.ToString());
+                    context.Response.Error(ex.ToString());
                     throw;
                 }
             }

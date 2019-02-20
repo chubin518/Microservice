@@ -17,19 +17,24 @@ namespace RpcClient
                 //.AddKestrelClient()
                 .AddNetmqClient()
                 .AddSingleton<IConfiguration>(i => builder.AddJsonFile("app.json").Build());
+
             IServiceProvider serviceProvider = serviceDescriptors.BuildServiceProvider();
 
             IHelloService helloService = serviceProvider.GetRequiredService<IHelloService>();
+
+
             Enumerable.Range(0, 1000).ToList().ForEach(item =>
             {
                 Task.Factory.StartNew((async () =>
                 {
-                    string data = await helloService.HelloAsync("tom");
+                    string data = await helloService.HelloAsync("1");
                     Console.WriteLine(data);
-                    await Task.Delay(1000);
-                    string result = helloService.Hello("tom");
-                    Console.WriteLine(result);
                 }));
+                //Task.Factory.StartNew(() =>
+                //{
+                //    string result = helloService.Hello("2");
+                //    Console.WriteLine(result);
+                //});
             });
 
             Console.ReadKey();

@@ -22,7 +22,7 @@ namespace RpcServer
         {
             _logger.LogInformation(name + "————" + DateTime.Now.ToLongTimeString());
             string result = Hello(name);
-            //await Task.Delay(5000);
+            await Task.Delay(5000);
             return result + " 我是异步请求";
         }
     }

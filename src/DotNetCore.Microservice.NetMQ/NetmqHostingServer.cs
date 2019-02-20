@@ -14,15 +14,16 @@ namespace DotNetCore.Microservice.NetMQ
 {
     public class NetmqHostingServer : IHostingServer
     {
+        //进程内通信协议
         private const string INPROC_SERVER_URL = "inproc://response_dealer";
         private static readonly double TimestampToTicks = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
-        private readonly NetMQSocket _routerSocket; //负责接收客户端消息
-        private readonly NetMQSocket _dealerSocket;
-        private readonly Proxy _routeProxy;
-        private readonly NetMQPoller _processPoller;
         private readonly HostingOptions _hostingOptions;
         private readonly ISerializer<string> _serializer;
         private readonly ILogger<NetmqHostingServer> _logger;
+        private NetMQSocket _routerSocket; //负责接收客户端消息
+        private NetMQSocket _dealerSocket; //负责与worker通信
+        private NetMQPoller _poller;
+        private NetMQPoller _workerPoller;
 
         public NetmqHostingServer(IOptions<HostingOptions> options,
             ISerializer<string> serializer,
@@ -31,51 +32,72 @@ namespace DotNetCore.Microservice.NetMQ
             _hostingOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _routerSocket = new RouterSocket($"tcp://{_hostingOptions.Host}");
-            _dealerSocket = new DealerSocket();
-            _dealerSocket.Bind(INPROC_SERVER_URL);
-            _processPoller = new NetMQPoller();
-            _routeProxy = new Proxy(_routerSocket, _dealerSocket);
+        }
+
+        private void DealerSocket_ReceiveReady(object sender, NetMQSocketEventArgs e)
+        {
+            NetMQMessage message = e.Socket.ReceiveMultipartMessage();
+            _routerSocket.SendMultipartMessage(message);
+        }
+
+        private void RouterSocket_ReceiveReady(object sender, NetMQSocketEventArgs e)
+        {
+            NetMQMessage message = e.Socket.ReceiveMultipartMessage();
+            _dealerSocket.SendMultipartMessage(message);
         }
 
         public Task StartAsync(HostingApplication hostingApplication, CancellationToken cancellationToken)
         {
+            _routerSocket = new RouterSocket();
+            _routerSocket.Bind($"tcp://{_hostingOptions.Host}");
+            _routerSocket.ReceiveReady += RouterSocket_ReceiveReady;
+            _dealerSocket = new DealerSocket();
+            _dealerSocket.Bind(INPROC_SERVER_URL);
+            _dealerSocket.ReceiveReady += DealerSocket_ReceiveReady;
+
+            _poller = new NetMQPoller { _routerSocket, _dealerSocket };
+            _poller.RunAsync();
+            _workerPoller = new NetMQPoller();
             async void OnReceiveReady(object sender, NetMQSocketEventArgs args)
             {
-                string message = args.Socket.ReceiveFrameString(Encoding.UTF8);
+                NetMQMessage receiveMessage = args.Socket.ReceiveMultipartMessage();
+                string address = receiveMessage.Pop().ConvertToString();
+                string content = receiveMessage.Last().ConvertToString(Encoding.UTF8);
                 OwinContext owinContext = null;
                 long startTimestamp = Stopwatch.GetTimestamp();
                 try
                 {
-                    _logger.LogInformation($"Request starting tcp://{_hostingOptions.Host} {message}");
-                    owinContext = hostingApplication.CreateContext(message);
+                    _logger.LogInformation($"Request starting tcp://{_hostingOptions.Host} {content}");
+                    owinContext = hostingApplication.CreateContext(content);
                     await hostingApplication.ProcessRequestAsync(owinContext);
                 }
                 catch (Exception ex)
                 {
-                    owinContext.Response = OwinResponse.Error(ex.Message);
+                    owinContext.Response.Error(ex.Message);
                     throw;
                 }
                 finally
                 {
-                    string text = _serializer.Serialize(owinContext.Response);
-                    _logger.LogInformation($"Request finished in {new TimeSpan((long)(TimestampToTicks * (Stopwatch.GetTimestamp() - startTimestamp))).TotalMilliseconds}ms {text}");
-                    args.Socket.SendFrame(text);
+                    string sendContent = _serializer.Serialize(owinContext.Response);
+                    _logger.LogInformation($"Request finished in {new TimeSpan((long)(TimestampToTicks * (Stopwatch.GetTimestamp() - startTimestamp))).TotalMilliseconds}ms {sendContent}");
+                    NetMQMessage sendMessage = new NetMQMessage();
+                    sendMessage.Append(address);
+                    sendMessage.AppendEmptyFrame();
+                    sendMessage.Append(sendContent, Encoding.UTF8);
+                    args.Socket.SendMultipartMessage(sendMessage);
                     hostingApplication.DisponseContext(owinContext);
                 }
             }
 
-            NetMQSocket process;
             foreach (var item in Enumerable.Range(0, _hostingOptions.ProcessCount))
             {
-                process = new ResponseSocket();
+                NetMQSocket process = new DealerSocket();
                 process.Connect(INPROC_SERVER_URL);
                 process.ReceiveReady += OnReceiveReady;
-                _processPoller.Add(process);
+                _workerPoller.Add(process);
             }
 
-            _processPoller.RunAsync();
-            Task.Factory.StartNew(_routeProxy.Start);
+            _workerPoller.RunAsync();
             return Task.CompletedTask;
         }
 
@@ -83,8 +105,8 @@ namespace DotNetCore.Microservice.NetMQ
         {
             _routerSocket.Dispose();
             _dealerSocket.Dispose();
-            Task.Factory.StartNew(_routeProxy.Stop);
-            _processPoller.StopAsync();
+            _poller.StopAsync();
+            _workerPoller.StopAsync();
             NetMQConfig.Cleanup(false);
             return Task.CompletedTask;
         }
