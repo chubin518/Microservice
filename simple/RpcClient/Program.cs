@@ -5,6 +5,7 @@ using RpcContracts;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+
 namespace RpcClient
 {
     class Program
@@ -23,18 +24,15 @@ namespace RpcClient
             IHelloService helloService = serviceProvider.GetRequiredService<IHelloService>();
 
 
-            Enumerable.Range(0, 1000).ToList().ForEach(item =>
+            Enumerable.Range(0, 10000).ToList().ForEach(async (item) =>
             {
-                Task.Factory.StartNew((async () =>
-                {
-                    string data = await helloService.HelloAsync("1");
-                    Console.WriteLine(data);
-                }));
-                //Task.Factory.StartNew(() =>
-                //{
-                //    string result = helloService.Hello("2");
-                //    Console.WriteLine(result);
-                //});
+                string data = await helloService.HelloAsync("1");
+                Console.WriteLine(data);
+                await Task.Factory.StartNew(() =>
+                 {
+                     string result = helloService.Hello("2");
+                     Console.WriteLine(result);
+                 });
             });
 
             Console.ReadKey();

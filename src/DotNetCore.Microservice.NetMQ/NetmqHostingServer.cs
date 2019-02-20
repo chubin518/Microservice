@@ -65,10 +65,10 @@ namespace DotNetCore.Microservice.NetMQ
                 string content = receiveMessage.Last().ConvertToString(Encoding.UTF8);
                 OwinContext owinContext = null;
                 long startTimestamp = Stopwatch.GetTimestamp();
+                _logger.LogInformation($"Request starting tcp://{_hostingOptions.Host} {content}");
+                owinContext = hostingApplication.CreateContext(content);
                 try
                 {
-                    _logger.LogInformation($"Request starting tcp://{_hostingOptions.Host} {content}");
-                    owinContext = hostingApplication.CreateContext(content);
                     await hostingApplication.ProcessRequestAsync(owinContext);
                 }
                 catch (Exception ex)
